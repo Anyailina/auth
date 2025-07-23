@@ -1,8 +1,11 @@
-package org.annill.security.entity;
+package org.annill.security.dto;
 
 import java.util.List;
-import lombok.Data;
 import lombok.Getter;
+/**
+ * Ответ с JWT токеном и данными пользователя.
+ * Содержит токен, тип токена, идентификатор пользователя, его имя, email и роли.
+ */
 
 @Getter
 public class JwtResponse {
@@ -21,4 +24,5 @@ public class JwtResponse {
         this.email = email;
         this.roles = roles;
     }
+
 }

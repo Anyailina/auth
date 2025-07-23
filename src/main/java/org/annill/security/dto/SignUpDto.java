@@ -1,18 +1,17 @@
 package org.annill.security.dto;
 
-import java.util.Set;
 import lombok.Data;
+
+/**
+ * DTO для регистрации нового пользователя.
+ * Содержит основные данные пользователя: имя, email и пароль.
+ */
 
 @Data
 public class SignUpDto {
 
     private String username;
-
-
     private String email;
-
-    private Set<String> role;
-
     private String password;
 
 }

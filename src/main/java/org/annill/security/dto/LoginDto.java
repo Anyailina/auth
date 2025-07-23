@@ -1,10 +1,15 @@
 package org.annill.security.dto;
 
 import lombok.Data;
-import lombok.Value;
+/**
+ * DTO для аутентификации пользователя.
+ * Содержит учетные данные пользователя: имя и пароль.
+ */
 
 @Data
-public class LoginDto{
+public class LoginDto {
+
     private String username;
     private String password;
+
 }

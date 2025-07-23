@@ -1,12 +1,16 @@
 package org.annill.security.dto;
 
-
 import java.util.Collection;
 import lombok.Builder;
 import lombok.Value;
 import org.annill.security.entity.Role;
 import org.annill.security.entity.User;
 
+/**
+ * DTO для представления пользователя.
+ * Содержит основные данные пользователя и список его ролей.
+ * Поддерживает преобразование из сущности User.
+ */
 @Value
 @Builder(toBuilder = true)
 public class UserDto {
@@ -17,7 +21,6 @@ public class UserDto {
 
     private Collection<Role> roles;
 
-
     public static UserDto fromEntity(User user) {
         return UserDto.builder()
             .id(user.getId())
@@ -26,4 +29,5 @@ public class UserDto {
             .roles(user.getRoles())
             .build();
     }
+
 }

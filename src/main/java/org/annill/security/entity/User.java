@@ -1,6 +1,5 @@
 package org.annill.security.entity;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,15 +14,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.annill.security.dto.UserDto;
 
 @Data
 @Entity
-@Table(name = "users",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = "username"),
-        @UniqueConstraint(columnNames = "email")
-    })
+@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "username"),
+    @UniqueConstraint(columnNames = "email")})
 @Accessors(chain = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,15 +38,11 @@ public class User {
     )
     private Collection<Role> roles;
 
-
-    public static User fromDto(UserDto userDto) {
-        return new User().setId(userDto.getId()).setUsername(userDto.getUsername()).setEmail(userDto.getEmail())
-            .setRoles(userDto.getRoles());
-    }
-
-    public User(String username, String email,String password) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.password = password;
         this.email = email;
     }
+
 }
+

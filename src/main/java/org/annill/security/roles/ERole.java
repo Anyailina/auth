@@ -1,6 +1,10 @@
 package org.annill.security.roles;
 
+/**
+ * Виды ролей
+ */
 public enum ERole {
+
     USER,
     CREDIT_USER,
     OVERDRAFT_USER,
@@ -9,4 +13,5 @@ public enum ERole {
     CONTRACTOR_SUPERUSER,
     SUPERUSER,
     ADMIN
+
 }

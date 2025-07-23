@@ -8,7 +8,7 @@ spring:
     name: security
 
   jwt:
-    jwtSecret: "123"
+    jwtSecret: "verysecretkey-should-be-at-least-256-bits-long!"
     jwtExpirationMs: 10000000
 
   jpa:
@@ -21,3 +21,4 @@ spring:
     user: ${spring.datasource.username}
     password: ${spring.datasource.password}
     url: ${spring.datasource.url}
+    enabled: true
