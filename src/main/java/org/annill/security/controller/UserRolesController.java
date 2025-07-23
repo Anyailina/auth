@@ -3,6 +3,7 @@ package org.annill.security.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.annill.security.dto.RoleDto;
 import org.annill.security.dto.SaveRolesDto;
 import org.annill.security.service.UserService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("ui/user-roles")
 @RequiredArgsConstructor
+@Slf4j
 public class UserRolesController {
 
     private final UserService userService;
@@ -38,6 +40,7 @@ public class UserRolesController {
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @Operation(summary = "Получение ролей для пользователя")
     public ResponseEntity<List<RoleDto>> getRoles(@PathVariable String login, Authentication authentication) {
+        log.info("Получение ролей для пользователя");
         return ResponseEntity.ok(userService.getUserRoles(login, authentication));
     }
 
@@ -53,6 +56,7 @@ public class UserRolesController {
     @Operation(summary = "Сохранение ролей пользователю")
     public ResponseEntity<?> saveRoles(@RequestBody SaveRolesDto saveRolesRequest) {
         userService.addUserRoles(saveRolesRequest);
+        log.info("Сохранение ролей пользователю");
         return ResponseEntity.ok().build();
     }
 

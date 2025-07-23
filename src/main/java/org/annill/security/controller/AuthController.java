@@ -2,6 +2,7 @@ package org.annill.security.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.annill.security.dto.LoginDto;
 import org.annill.security.dto.SignUpDto;
 import org.annill.security.dto.UserDto;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final UserService userService;
@@ -34,6 +36,7 @@ public class AuthController {
     @PostMapping("/signin")
     @Operation(summary = "Вход")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginDto loginRequest) {
+        log.info("Вход");
         UserDto userAndValidate = userService.getUserAndValidate(loginRequest);
         String jwt = jwtUtils.generateJwtToken(userAndValidate);
         return ResponseEntity.ok(jwt);
@@ -48,6 +51,7 @@ public class AuthController {
     @PostMapping("/signup")
     @Operation(summary = "Регистрация")
     public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpRequest) {
+        log.info("Регистрация");
         userService.registerUser(signUpRequest);
         return ResponseEntity.ok().build();
     }
