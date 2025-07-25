@@ -1,5 +1,6 @@
 package org.annill.security.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 /**
  * DTO для аутентификации пользователя.
@@ -7,6 +8,7 @@ import lombok.Data;
  */
 
 @Data
+@AllArgsConstructor
 public class LoginDto {
 
     private String username;

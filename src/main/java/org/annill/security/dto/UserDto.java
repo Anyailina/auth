@@ -1,5 +1,6 @@
 package org.annill.security.dto;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import lombok.Builder;
 import lombok.Value;
