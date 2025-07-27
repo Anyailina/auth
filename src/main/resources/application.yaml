@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5435/security
+    username: myuser
+    password: secret
+  application:
+    name: security
+
+  jwt:
+    jwtSecret: "verysecretkey-should-be-at-least-256-bits-long!"
+    jwtExpirationMs: 10000000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    change-log: /db/changelog/changelog.xml
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    url: ${spring.datasource.url}
+    enabled: true
