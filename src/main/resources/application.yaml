@@ -6,6 +6,21 @@ spring:
     password: secret
   application:
     name: security
+  thymeleaf:
+    cache: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 716274612608-8ujjm8cpctu02g88o62q3loni8jon6qt.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+
+
 
   jwt:
     jwtSecret: "verysecretkey-should-be-at-least-256-bits-long!"

@@ -16,30 +16,71 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Конфигурация безопасности приложения.
- * Настраивает аутентификацию, авторизацию и защиту от CSRF.
- */
-@EnableMethodSecurity(prePostEnabled = true)
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final AuthTokenFilter authTokenFilter;
 
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(
+//                                "/auth/signin",
+//                                "/auth/signup",
+//                                "/oauth2/**",
+//                                "/login/oauth2/**",
+//                                "/web/**"
+//                        ).permitAll()
+//                        .anyRequest().authenticated()
+//                )
+//                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .exceptionHandling(exception -> exception.authenticationEntryPoint(
+//                        (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Не авторизован"))
+//                );
+//
+//        return http.build();
+//    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(
-                auth ->
-                        auth.requestMatchers("auth/signin").permitAll()
-                        .requestMatchers("auth/signup").permitAll()
-                    .anyRequest().authenticated())
-            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(
-                (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Не авторизован")));
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/",
+                                "/web/**",
+                                "/auth/signin",
+                                "/auth/signup",
+                                "/oauth2/**",
+                                "/login",
+                                "/webjars/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/web/login-form")
+                        .loginProcessingUrl("/auth/signin")
+                        .defaultSuccessUrl("/web/home", true)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/web/login-form")
+                        .defaultSuccessUrl("/web/home", true)
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Не авторизован")
+                        )
+                );
 
         return http.build();
     }
@@ -51,9 +92,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-        throws Exception {
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
 }
-
