@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5435/security
@@ -13,8 +15,8 @@ spring:
       client:
         registration:
           google:
-            client-id: 716274612608-8ujjm8cpctu02g88o62q3loni8jon6qt.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
               - email
