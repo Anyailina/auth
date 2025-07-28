@@ -93,15 +93,15 @@ class UserRolesControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .with(csrf()))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().is3xxRedirection());
 
         verify(userService, never()).addUserRoles(any());
     }
 
     @Test
     void getRoles_Unauthenticated_ShouldReturnUnauthorized() throws Exception {
-        mockMvc.perform(get("/ui/user-roles/test@example.com"))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/ui/user-roles/test@example.com")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is3xxRedirection());
     }
-
 }

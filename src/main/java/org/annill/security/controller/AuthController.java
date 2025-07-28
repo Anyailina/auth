@@ -9,8 +9,10 @@ import org.annill.security.dto.UserDto;
 import org.annill.security.security.JwtUtils;
 import org.annill.security.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Контроллер для обработки запросов аутентификации и регистрации пользователей.
@@ -39,6 +41,7 @@ public class AuthController {
         String jwt = jwtUtils.generateJwtToken(userAndValidate);
         return ResponseEntity.ok(jwt);
     }
+
 
     /**
      * Регистрирует нового пользователя в системе.
