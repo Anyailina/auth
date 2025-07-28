@@ -42,6 +42,7 @@ public class AuthController {
         return ResponseEntity.ok(jwt);
     }
 
+
     /**
      * Регистрирует нового пользователя в системе.
      *

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Добавлены иконки Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .login-container { max-width: 400px; margin: 100px auto; }
+        .google-btn {
+            background: #dd4b39;
+            color: white;
+            border: none;
+            transition: background 0.3s;
+        }
+        .google-btn:hover {
+            background: #c23321;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="login-container">
+        <h2 class="text-center mb-4">Авторизация</h2>
+
+        <form th:action="@{/auth/signin}" method="post" th:object="${loginDto}">
+            <div class="mb-3">
+                <label class="form-label">Логин</label>
+                <input type="text" class="form-control" th:field="*{username}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Пароль</label>
+                <input type="password" class="form-control" th:field="*{password}" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Войти</button>
+        </form>
+
+        <div class="text-center my-3">Или</div>
+
+        <a th:href="@{/oauth2/authorization/google(prompt='select_account')}" class="btn google-btn w-100">
+            <i class="bi bi-google"></i> Войти через Google
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<script>
+    document.querySelector("form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const data = {
+            username: document.querySelector("[name='username']").value,
+            password: document.querySelector("[name='password']").value
+        };
+        const response = await fetch("/auth/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+        if (response.ok) {
+            const token = await response.text();
+            localStorage.setItem("jwt", token);
+            window.location.href = "/web/home";
+        } else {
+            alert("Ошибка входа");
+        }
+    });
+</script>

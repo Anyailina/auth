@@ -14,7 +14,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="password" type="VARCHAR(80)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
             <column name="email" type="VARCHAR(50)"/>
         </createTable>

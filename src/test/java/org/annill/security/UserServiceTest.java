@@ -6,6 +6,7 @@ import org.annill.security.dto.SaveRolesDto;
 import org.annill.security.dto.SignUpDto;
 import org.annill.security.dto.UserDto;
 import org.annill.security.entity.Role;
+import org.annill.security.entity.TypeRegistration;
 import org.annill.security.entity.User;
 import org.annill.security.repository.UserRepository;
 import org.annill.security.roles.ERole;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.*;
@@ -42,6 +44,9 @@ class UserServiceTest {
     private RoleService roleService;
 
     @Mock
+    private OAuth2User oauth2User;
+
+    @Mock
     private BCryptPasswordEncoder encoder;
 
     @Mock
@@ -52,7 +57,11 @@ class UserServiceTest {
 
     @Test
     void findByUserName_ShouldReturnUser() {
-        User user = new User("test", "test@example.com", "password");
+        User user = new User()
+                .setUsername("test")
+                .setEmail("test@example.com")
+                .setPassword("password")
+                .setTypeRegistration(TypeRegistration.OAUTH);
         when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
         User result = userService.findByUserName("test");
 
@@ -107,7 +116,11 @@ class UserServiceTest {
     @WithMockUser(roles = {"USER"})
     void getUserRoles_UserShouldGetOwnRoles() {
 
-        User currentUser = new User("current", "current@example.com", "password");
+        User currentUser = new User()
+                .setUsername("test")
+                .setEmail("test@example.com")
+                .setPassword("password")
+                .setTypeRegistration(TypeRegistration.OAUTH);
         Role userRole = new Role(1, ERole.USER);
         currentUser.setRoles(Set.of(userRole));
 
@@ -130,7 +143,11 @@ class UserServiceTest {
 
     @Test
     void loadUserByUsername_ShouldReturnUserDetails() {
-        User user = new User("test", "test@example.com", "password");
+        User user = new User()
+                .setUsername("test")
+                .setEmail("test@example.com")
+                .setPassword("password")
+                .setTypeRegistration(TypeRegistration.OAUTH);
         Role adminRole = new Role(1, ERole.ADMIN);
         user.setRoles(Set.of(adminRole));
 
@@ -146,13 +163,18 @@ class UserServiceTest {
 
     @Test
     void getUserAndValidate_ShouldReturnUserDto() {
+        String encodedPassword = "encodedPassword";
 
         LoginDto loginDto = new LoginDto("test", "password");
-        User user = new User("test", "test@example.com", "encodedPassword");
+        User user = new User()
+                .setUsername("test")
+                .setEmail("test@example.com")
+                .setPassword(encodedPassword)
+                .setTypeRegistration(TypeRegistration.OAUTH);
 
         when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
-        when(encoder.matches("password", "encodedPassword")).thenReturn(true);
 
+        when(encoder.matches("password", encodedPassword)).thenReturn(true);
 
         UserDto result = userService.getUserAndValidate(loginDto);
 
@@ -162,15 +184,22 @@ class UserServiceTest {
 
     @Test
     void getUserAndValidate_ShouldThrowOnWrongPassword() {
+        String encodedPassword = "encodedPassword";
+
         LoginDto loginDto = new LoginDto("test", "wrong");
-        User user = new User("test", "test@example.com", "encodedPassword");
+        User user = new User()
+                .setUsername("test")
+                .setEmail("test@example.com")
+                .setPassword(encodedPassword)
+                .setTypeRegistration(TypeRegistration.OAUTH);
 
         when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
-        when(encoder.matches("wrong", "encodedPassword")).thenReturn(false);
+        when(encoder.matches("wrong", encodedPassword)).thenReturn(false);
 
         assertThrows(IllegalAccessError.class,
                 () -> userService.getUserAndValidate(loginDto));
     }
+
 
     @Test
     void getUserAndValidate_ShouldThrowOnUserNotFound() {
@@ -180,5 +209,76 @@ class UserServiceTest {
 
         assertThrows(UsernameNotFoundException.class,
                 () -> userService.getUserAndValidate(loginDto));
+    }
+
+    @Test
+    void registerOAuth2_WhenNewUser_ShouldCreateUser() {
+        String email = "new@example.com";
+        String name = "New User";
+        Role userRole = new Role().setName(ERole.USER);
+        User expectedUser = new User()
+                .setUsername(name)
+                .setEmail(email)
+                .setTypeRegistration(TypeRegistration.OAUTH2)
+                .setRoles(Set.of(userRole));
+
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(oauth2User.getAttribute("email")).thenReturn(email);
+        when(oauth2User.getAttribute("name")).thenReturn(name);
+        when(userRepository.findByEmailAndTypeRegistration(email, TypeRegistration.OAUTH))
+                .thenReturn(Optional.empty());
+        when(roleService.findByName(ERole.USER)).thenReturn(Optional.of(userRole));
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
+
+        UserDto result = userService.registerOAuth2(authentication);
+
+
+        assertNotNull(result);
+        assertEquals(name, result.getUsername());
+        assertEquals(email, result.getEmail());
+
+        verify(userRepository).save(argThat(user ->
+                user.getEmail().equals(email) &&
+                        user.getUsername().equals(name) &&
+                        user.getTypeRegistration() == TypeRegistration.OAUTH2
+        ));
+    }
+
+    @Test
+    void registerOAuth2_WhenUserExists_ShouldThrowException() {
+        String email = "existing@example.com";
+        User existingUser = new User().setEmail(email);
+
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(oauth2User.getAttribute("email")).thenReturn(email);
+        when(userRepository.findByEmailAndTypeRegistration(email, TypeRegistration.OAUTH))
+                .thenReturn(Optional.of(existingUser));
+
+        EntityExistsException exception = assertThrows(
+                EntityExistsException.class,
+                () -> userService.registerOAuth2(authentication)
+        );
+
+        assertEquals("Пользователь уже существует", exception.getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void registerOAuth2_WhenRoleNotFound_ShouldThrowException() {
+        String email = "new@example.com";
+        String name = "New User";
+
+        when(authentication.getPrincipal()).thenReturn(oauth2User);
+        when(oauth2User.getAttribute("email")).thenReturn(email);
+        when(oauth2User.getAttribute("name")).thenReturn(name);
+
+        when(userRepository.findByEmailAndTypeRegistration(email, TypeRegistration.OAUTH))
+                .thenReturn(Optional.empty());
+
+        when(roleService.findByName(ERole.USER)).thenReturn(Optional.empty());
+
+
+        assertThrows(EntityNotFoundException.class,() ->userService.registerOAuth2(authentication));
+        verify(userRepository, never()).save(any());
     }
 }
